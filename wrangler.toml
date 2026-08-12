@@ -1,0 +1,25 @@
+name = "glossary-sync"
+main = "worker.js"
+compatibility_date = "2026-08-01"
+
+# 每天台北時間 07:00（UTC 23:00）重抓 Notion、回寫狀態、寫當日摘要
+[triggers]
+crons = ["0 23 * * *"]
+
+# 把 App 本身也放在同一個網域下，避免跨網域被擋
+[assets]
+directory = "./public"
+
+[[kv_namespaces]]
+binding = "GLOSSARY"
+id = "774d96b5ce584dec8d27663a9a521320"
+
+[vars]
+GLOSSARY_DB = "3bab07b9915c8004a6c7e6767bec4dc0"
+STATE_DB = "884bebd4-40cc-47ee-9a08-2711c6d32628"
+LOG_DB = "d2abbe6b-a9f5-4158-acbe-79a2667252e8"
+
+# NOTION_TOKEN 與 APP_KEY 用 secret，不要寫在這裡：
+#   npx wrangler secret put NOTION_TOKEN
+#   npx wrangler secret put APP_KEY
+
