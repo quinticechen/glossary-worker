@@ -49,14 +49,18 @@ function toCard(page) {
   return {
     t: txt(p.term),
     f: txt(p.full),
+    b: txt(p.breakdown),
     p: txt(p.pos),
-    c: txt(p.pattern),
-    e: txt(p.example),
-    z: txt(p.chinese),
+    z: txt(p.chinese_finance),
     m: txt(p.meaning),
+    d: txt(p.def_en),
+    c: txt(p.pattern),
+    g: txt(p.pattern_explain),
     n: txt(p.note),
+    e: txt(p.example),
     s: sec.trim()[0],
     x: (p.trap?.select?.name || "No") === "Yes" ? 1 : 0,
+    w: txt(p.chinese_general),
   };
 }
 

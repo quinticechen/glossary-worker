@@ -55,14 +55,18 @@ glossary-worker/
 |---|---|---|
 | `t` | term | 英文詞條，同時是主鍵 |
 | `f` | full | 縮寫全名，沒有就空字串 |
+| `b` | breakdown | 拆字／組成拆解，翻牌後才顯示 |
 | `p` | pos | 詞性，如 `n. phr.` |
+| `z` | chinese_finance | 金融語境中文 |
+| `m` | meaning | 中文解釋 |
+| `d` | def_en | 英文定義，翻牌後才顯示 |
 | `c` | pattern | 搭配結構，如 `comply with sth` |
+| `g` | pattern_explain | 搭配結構的中文說明 |
+| `n` | note | 英式實務／使用註記 |
 | `e` | example | 例句，克漏字就是從這裡挖空 |
-| `z` | chinese | 中文 |
-| `m` | meaning | 解釋 |
-| `n` | note | 使用註記／陷阱註記 |
 | `s` | section | 只取第一個字元 A–O |
 | `x` | trap | Yes → 1 |
+| `w` | chinese_general | 只有 `trap` 為 Yes 才填：一般語境下容易誤解的中文，會混進陷阱辨義模式的四選一選項 |
 
 主鍵是 `term` 字串本身，沒有獨立 ID。**在 Notion 改 term 會被當成新卡**，舊的練習狀態會留在舊字串上。要改詞的話順手去 Card State 刪掉那一列。
 
