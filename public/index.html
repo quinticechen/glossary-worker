@@ -62,23 +62,22 @@ body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:
 .term{font-family:var(--serif);font-weight:600;font-size:clamp(27px,7vw,42px);line-height:1.15;letter-spacing:-.015em;margin:0;flex:1}
 .term.zh{font-family:var(--sans);font-weight:700;font-size:clamp(24px,6vw,34px);letter-spacing:.01em}
 .full{font-family:var(--serif);font-style:italic;font-size:16px;line-height:1.4;color:var(--ink-soft);margin-top:7px}
-.pos{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);border:1px solid var(--rule);padding:3px 8px;border-radius:2px;display:inline-block;margin-top:14px}
+.pos{font-family:var(--serif);font-style:italic;font-size:16px;line-height:1.4;color:var(--ink-soft);margin-top:7px}
 .spk{flex:none;appearance:none;background:none;border:1px solid var(--rule);color:var(--ink-soft);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;margin-top:6px}
 .spk:hover{border-color:var(--ink);color:var(--ink)}
 .spk.sm{width:26px;height:26px;font-size:12px;margin-top:0}
-.collo{font-family:var(--mono);font-size:13px;line-height:1.5;color:var(--ink);background:rgba(22,24,26,.04);border:1px dashed var(--rule);padding:8px 10px;border-radius:2px;margin-top:14px}
-.collo .lbl{display:block;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:3px}
-.exwrap{display:flex;align-items:flex-start;gap:9px;margin-top:14px}
-.exline{font-family:var(--serif);font-size:17px;line-height:1.6;color:#22262A;flex:1}
+.volicon{width:16px;height:16px}
+.spk.sm .volicon{width:13px;height:13px}
+.collo{font-family:var(--serif);font-size:15px;line-height:1.5;color:var(--ink);background:rgba(22,24,26,.04);padding:8px 10px;border-radius:4px;margin-top:14px}
+.exwrap{display:flex;align-items:flex-start;gap:9px;margin-top:14px;touch-action:auto}
+.exline{font-family:var(--serif);font-size:17px;line-height:1.6;color:#22262A;flex:1;touch-action:auto;user-select:text;-webkit-user-select:text}
 .exline b{font-weight:600;box-shadow:inset 0 -7px 0 rgba(169,113,26,.28)}
 .answer{margin-top:20px;border-top:1px solid var(--rule);padding-top:16px}
 .answer .zh{font-family:var(--sans);font-weight:700;font-size:21px;line-height:1.4}
 .answer .en{font-family:var(--serif);font-weight:600;font-size:27px;line-height:1.25}
 .answer .meaning{margin-top:8px;font-size:15px;color:#22262A}
-.note{margin-top:14px;border:1px solid var(--rule);border-left:3px solid var(--ink-soft);background:rgba(22,24,26,.025);padding:10px 12px;font-size:14px}
-.note .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);display:block;margin-bottom:3px}
-.is-trap .note{border-left-color:var(--seal);background:rgba(142,43,38,.05)}
-.is-trap .note .lbl{color:var(--seal)}
+.note{margin-top:14px;background:rgba(22,24,26,.03);border-radius:4px;padding:10px 12px;font-size:14px;color:var(--ink-soft)}
+.is-trap .note{background:rgba(142,43,38,.06);color:#7A3630}
 .spacer{flex:1}
 .clozeZh{font-family:var(--sans);font-weight:700;font-size:clamp(20px,5vw,26px);line-height:1.35;margin-top:22px}
 .blank{display:inline-block;min-width:76px;text-align:center;border-bottom:2px solid var(--seal);color:var(--seal);font-family:var(--mono);font-weight:500}
@@ -234,7 +233,7 @@ let TERMS = BUILTIN;
 
 /* ================= storage ================= */
 let PROG={}, LOG=[], SET={
-  tts:"off", size:20, sec:"ALL", mode:"auto", trap:false, due:false, showEx:true,
+  tts:"term", size:20, sec:"ALL", mode:"auto", trap:false, due:false, showEx:true,
   notion:"", lastSync:"", auto:"daily", lastAuto:0, worker:"", key:""
 };
 const hasWS=typeof window!=="undefined"&&window.storage&&typeof window.storage.get==="function";
@@ -302,9 +301,14 @@ function say(text){
   if(!window.speechSynthesis||!text) return;
   try{
     speechSynthesis.cancel();
-    const u=new SpeechSynthesisUtterance(text);
-    u.lang="en-GB"; u.rate=.95; if(!VOICE) VOICE=pickVoice(); if(VOICE) u.voice=VOICE;
-    speechSynthesis.speak(u);
+    if(speechSynthesis.paused) speechSynthesis.resume();
+    setTimeout(()=>{
+      try{
+        const u=new SpeechSynthesisUtterance(text);
+        u.lang="en-GB"; u.rate=.95; if(!VOICE) VOICE=pickVoice(); if(VOICE) u.voice=VOICE;
+        speechSynthesis.speak(u);
+      }catch(e){}
+    },50);
   }catch(e){}
 }
 const spoken=t=>t.f&&t.t.length<=5?t.t+", "+t.f:t.t;
@@ -380,9 +384,10 @@ function marked(term,sentence){
 const highlight=(t,s)=>marked(t,s).replace(/\u0001/g,"<b>").replace(/\u0002/g,"</b>");
 const cloze=(t,s)=>marked(t,s).replace(/\u0001[^\u0002]*\u0002/,'<span class="blank">?</span>');
 const hasBlank=(t,s)=>marked(t,s).includes("\u0001");
-const spk=(kind,sm)=>`<button class="spk ${sm?"sm":""}" data-say="${kind}" aria-label="發音">🔊</button>`;
+const VOL_SVG=`<svg class="volicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="M16 9a5 5 0 0 1 0 6"/></svg>`;
+const spk=(kind,sm)=>`<button class="spk ${sm?"sm":""}" data-say="${kind}" aria-label="發音">${VOL_SVG}</button>`;
 function usageBlock(t,show,showExample=true){
-  return (t.c?`<div class="collo"><span class="lbl">搭配結構</span>${esc(t.c)}</div>`:"")+
+  return (t.c?`<div class="collo">${esc(t.c)}</div>`:"")+
     (t.e&&showExample?`<div class="exwrap"><div class="exline">${show?highlight(t.t,t.e):cloze(t.t,t.e)}</div>${show?spk("ex",1):""}</div>`:"");
 }
 function backBlock(t,showEn,withUsage,showExample=true){
@@ -391,7 +396,7 @@ function backBlock(t,showEn,withUsage,showExample=true){
     ${showEn&&t.f?`<div class="full">${esc(t.f)}</div>`:""}
     <div class="meaning">${esc(t.m)}</div>
     ${withUsage?usageBlock(t,true,showExample):""}
-    <div class="note"><span class="lbl">${t.x?"陷阱註記":"使用註記"}</span>${esc(t.n)}</div>
+    <div class="note">${esc(t.n)}</div>
   </div>`;
 }
 function head(t){
@@ -429,11 +434,13 @@ function render(){
   wireCard();
 }
 function renderRecog(t){
+  const heading = t.f ? `${esc(t.t)} (${esc(t.f)})` : esc(t.t);
+  const exPre = (!S.revealed&&SET.showEx&&t.e)
+    ? `<div class="exwrap"><div class="exline">${highlight(t.t,t.e)}</div>${spk("ex",1)}</div>` : "";
   host.innerHTML=`<div class="card ${t.x?"is-trap":""}">
-    ${head(t)}
-    <div class="termline"><h2 class="term">${esc(t.t)}</h2>${spk("term")}</div>
-    ${t.f?`<div class="full">${esc(t.f)}</div>`:""}
+    <div class="termline"><h2 class="term">${heading}</h2>${spk("term")}</div>
     <div class="pos">${esc(t.p)}</div>
+    ${exPre}
     ${S.revealed?backBlock(t,false,true,SET.showEx):""}
     <div class="spacer"></div><div class="ghost"></div><div class="stampmark"></div></div>
   ${S.revealed?gradeBar:""}`;
@@ -502,8 +509,7 @@ function renderType(t){
       ${t.f?`<div class="full">${esc(t.f)}</div>`:""}
       ${usageBlock(t,true)}
       <div class="note"><span class="lbl">${t.x?"陷阱註記":"使用註記"}</span>${esc(t.n)}</div></div>`:""}
-    <div class="spacer"></div><div class="stampmark"></div></div>
-  ${answered?gradeBar:""}`;
+    <div class="spacer"></div><div class="stampmark"></div></div>`;
   bindGrade();
   const inp=document.getElementById("typein"), btn=document.getElementById("check");
   if(inp&&!answered){
@@ -520,6 +526,7 @@ function submitType(){
   S.verdict = d===0?"ok" : d<=Math.max(1,Math.round(b.length*0.15))?"near" : "no";
   render();
   if(S.verdict==="ok") say(spoken(t));
+  grade(S.verdict==="ok"?2:S.verdict==="near"?1:0);
 }
 function renderTrap(t){
   if(!t.opts){
@@ -566,7 +573,7 @@ function wireCard(){
   const dirOf=(dx,dy)=>Math.abs(dx)>Math.abs(dy)?(dx<0?"left":"right"):(dy<0?"up":null);
   let sx=0,sy=0,t0=0,drag=false,active=false;
   card.addEventListener("pointerdown",e=>{
-    if(e.target.closest("button")) return;
+    if(e.target.closest("button")||e.target.closest(".exline")||e.target.closest(".exwrap")) return;
     active=true;drag=false;sx=e.clientX;sy=e.clientY;t0=Date.now();
     card.setPointerCapture(e.pointerId); card.classList.add("dragging");
   });
@@ -583,7 +590,7 @@ function wireCard(){
   card.addEventListener("pointerup",e=>{
     if(!active) return; active=false; card.classList.remove("dragging");
     const dx=e.clientX-sx,dy=e.clientY-sy;
-    if(!drag&&Date.now()-t0<500){ card.style.transform="";ghost.style.opacity=0; if(!S.revealed) reveal(); return; }
+    if(!drag&&Date.now()-t0<500){ card.style.transform="";ghost.style.opacity=0; S.revealed=!S.revealed; render(); return; }
     const d=dirOf(dx,dy),dist=Math.max(Math.abs(dx),-dy);
     if(d&&dist>60&&S.revealed){ ghost.style.opacity=0; grade(d==="left"?0:d==="up"?1:2); return; }
     card.style.transform="";ghost.style.opacity=0;
