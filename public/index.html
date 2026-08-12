@@ -153,11 +153,11 @@ h2.blk{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transfor
 
 <div class="topbar">
   <nav class="tabs" role="tablist">
-    <button class="tab" role="tab" aria-selected="true" data-view="study"><svg class="navicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.013 18.582 6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.12 2.12 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.12 2.12 0 0 0 1.597-1.16l2.309-4.679a.53.53 0 0 1 .95 0l2.31 4.679a2.12 2.12 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904L20 11.5"/><path d="M15 18h6"/><path d="M18 15v6"/></svg>練習</button>
-    <button class="tab" role="tab" aria-selected="false" data-view="ledger"><svg class="navicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 5H3"/><path d="M15 12H3"/><path d="M17 19H3"/></svg>全表</button>
-    <button class="tab" role="tab" aria-selected="false" data-view="progress"><svg class="navicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></svg>進度</button>
+    <button class="tab" role="tab" aria-selected="true" data-view="study"><svg class="navicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.013 18.582 6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.12 2.12 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.12 2.12 0 0 0 1.597-1.16l2.309-4.679a.53.53 0 0 1 .95 0l2.31 4.679a2.12 2.12 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904L20 11.5"/><path d="M15 18h6"/><path d="M18 15v6"/></svg></button>
+    <button class="tab" role="tab" aria-selected="false" data-view="ledger"><svg class="navicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 5H3"/><path d="M15 12H3"/><path d="M17 19H3"/></svg></button>
+    <button class="tab" role="tab" aria-selected="false" data-view="progress"><svg class="navicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></svg></button>
   </nav>
-  <button class="gear" id="gear" aria-expanded="false"><svg class="navicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>設定</button>
+  <button class="gear" id="gear" aria-expanded="false"><svg class="navicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg></button>
 </div>
 <div class="track"><span id="track"></span></div>
 
@@ -407,9 +407,9 @@ function head(t){
     <span>${t.x?"TRAP · ":""}第 ${r.st} 階 ${STAGES[r.st].name} · ${r.b}/${TOP[r.st]}${off?" · 不計分":""}</span></div>`;
 }
 const gradeBar=`<div class="actions">
-  <button class="btn d" data-g="0">Decline<small>不會</small></button>
-  <button class="btn r" data-g="1">Refer<small>模糊</small></button>
-  <button class="btn a" data-g="2">Approve<small>會了</small></button></div>`;
+  <button class="btn d" data-g="0">Decline</button>
+  <button class="btn r" data-g="1">Refer</button>
+  <button class="btn a" data-g="2">Approve</button></div>`;
 function setTrack(){
   const el=document.getElementById("track");
   const done=S.total?S.total-S.queue.length-(S.cur?1:0):0;
@@ -454,14 +454,13 @@ function renderCloze(t){
     t.copts=shuffle([{w:t.t,ok:1},...picks.map(p=>({w:p.t,ok:0}))]);
   }
   host.innerHTML=`<div class="card ${t.x?"is-trap":""}" style="touch-action:auto;cursor:default">
-    ${head(t)}
     <div class="exwrap"><div class="exline">${cloze(t.t,t.e)}</div></div>
     <div class="opts">${t.copts.map((o,k)=>`<button class="opt" data-ok="${o.ok}" data-k="${k}"><span class="k">${"ABCD"[k]}</span><span>${esc(o.w)}</span></button>`).join("")}</div>
     ${S.answered?`<div class="answer"><div class="en">${esc(t.t)}</div>
       ${t.f?`<div class="full">${esc(t.f)}</div>`:""}
       <div class="meaning">${esc(t.m)}</div>
       ${usageBlock(t,true)}
-      <div class="note"><span class="lbl">${t.x?"陷阱註記":"使用註記"}</span>${esc(t.n)}</div></div>`:""}
+      <div class="note">${esc(t.n)}</div></div>`:""}
     <div class="spacer"></div><div class="stampmark"></div></div>
   ${S.answered?`<div class="actions one"><button class="btn" id="nx">下一張</button></div>`:""}`;
   const btns=host.querySelectorAll(".opt");
@@ -496,10 +495,9 @@ function lev(a,b){
 function renderType(t){
   const answered=S.verdict!=null;
   host.innerHTML=`<div class="card ${t.x?"is-trap":""}" style="touch-action:auto;cursor:default">
-    ${head(t)}
     <div class="clozeZh">${esc(t.z)}</div>
     <div class="meaning" style="margin-top:6px">${esc(t.m)}</div>
-    ${t.c?`<div class="collo"><span class="lbl">搭配結構</span>${esc(t.c).replace(/[A-Za-z£][A-Za-z0-9£'\-]*/, m=>answered?m:"____")}</div>`:""}
+    ${t.c?`<div class="collo">${esc(t.c).replace(/[A-Za-z£][A-Za-z0-9£'\-]*/, m=>answered?m:"____")}</div>`:""}
     <div class="typewrap">
       <input class="typein" id="typein" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"
         placeholder="打出英文原詞" value="${esc(S.typed)}" ${answered?"disabled":""}>
@@ -509,8 +507,9 @@ function renderType(t){
       <div class="answer"><div class="en">${esc(t.t)}</div>
       ${t.f?`<div class="full">${esc(t.f)}</div>`:""}
       ${usageBlock(t,true)}
-      <div class="note"><span class="lbl">${t.x?"陷阱註記":"使用註記"}</span>${esc(t.n)}</div></div>`:""}
-    <div class="spacer"></div><div class="stampmark"></div></div>`;
+      <div class="note">${esc(t.n)}</div></div>`:""}
+    <div class="spacer"></div><div class="stampmark"></div></div>
+  ${answered?`<div class="actions one"><button class="btn" id="nx">下一張</button></div>`:""}`;
   bindGrade();
   const inp=document.getElementById("typein"), btn=document.getElementById("check");
   if(inp&&!answered){
@@ -518,6 +517,8 @@ function renderType(t){
     inp.oninput=e=>{S.typed=e.target.value;};
     inp.onkeydown=e=>{ if(e.key==="Enter") submitType(); };
     if(btn) btn.onclick=submitType;
+  } else if(answered){
+    const nx=document.getElementById("nx"); if(nx) nx.onclick=next;
   }
 }
 function submitType(){
@@ -525,9 +526,15 @@ function submitType(){
   if(!a) return;
   const d=lev(a,b);
   S.verdict = d===0?"ok" : d<=Math.max(1,Math.round(b.length*0.15))?"near" : "no";
+  const g=S.verdict==="ok"?2:S.verdict==="near"?1:0;
+  const key=idOf(t), r=rec(t), does=scored(t,S.mode)||SET.mode==="auto", before=r.st;
+  if(does){ applyGrade(r,g); PROG[key]=r; saveProg(); }
+  LOG.push([t.t,Math.round(Date.now()/60000),g,"type",Math.min(999,Math.round((Date.now()-S.shown)/100)),before,does?1:0]);
+  if(LOG.length>4000) LOG=LOG.slice(-4000);
+  saveLog(); if(LOG.length%8===0) pushState(true);
+  if(g<2) S.queue.splice(Math.min(3,S.queue.length),0,t);
   render();
   if(S.verdict==="ok") say(spoken(t));
-  grade(S.verdict==="ok"?2:S.verdict==="near"?1:0);
 }
 function renderTrap(t){
   if(!t.opts){
@@ -536,12 +543,11 @@ function renderTrap(t){
     t.opts=shuffle([{z:t.z,ok:1},...picks.map(p=>({z:p.z,ok:0}))]);
   }
   host.innerHTML=`<div class="card is-trap" style="touch-action:auto;cursor:default">
-    ${head(t)}
     <div class="termline"><h2 class="term">${esc(t.t)}</h2>${spk("term")}</div>
     ${t.f?`<div class="full">${esc(t.f)}</div>`:""}
     <div class="opts">${t.opts.map((o,k)=>`<button class="opt" data-ok="${o.ok}" data-k="${k}"><span class="k">${"ABCD"[k]}</span><span>${esc(o.z)}</span></button>`).join("")}</div>
     ${S.answered?`<div class="answer"><div class="meaning">${esc(t.m)}</div>
-      <div class="note"><span class="lbl">陷阱註記</span>${esc(t.n)}</div></div>`:""}
+      <div class="note">${esc(t.n)}</div></div>`:""}
     <div class="spacer"></div><div class="stampmark"></div></div>
   ${S.answered?`<div class="actions one"><button class="btn" id="nx">下一張</button></div>`:""}`;
   const btns=host.querySelectorAll(".opt");
@@ -604,9 +610,10 @@ document.addEventListener("keydown",e=>{
   const k=e.key.toLowerCase();
   if(k===" "){ e.preventDefault();
     if(S.mode==="trap"||S.mode==="cloze"){ if(S.answered) next(); }
-    else if(!S.cur) buildQueue(); else if(!S.revealed&&S.mode!=="type") reveal(); }
+    else if(S.mode==="type"){ if(S.verdict!=null) next(); }
+    else if(!S.cur) buildQueue(); else if(!S.revealed) reveal(); }
   if(k==="s"&&S.cur) say(spoken(S.cur));
-  if((S.revealed||S.verdict)&&"123".includes(k)) grade(+k-1);
+  if(S.revealed&&"123".includes(k)) grade(+k-1);
   if((S.mode==="trap"||S.mode==="cloze")&&!S.answered&&"abcd".includes(k)){ const b=host.querySelectorAll(".opt")["abcd".indexOf(k)]; if(b) b.click(); }
 });
 
