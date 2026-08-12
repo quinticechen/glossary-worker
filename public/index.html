@@ -181,6 +181,7 @@ h2.blk{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transfor
   </select></div>
   <div class="srow"><label>只練陷阱字</label><button class="toggle" id="trapChip" aria-pressed="false" aria-label="只練陷阱字"></button></div>
   <div class="srow"><label>只練到期</label><button class="toggle" id="dueChip" aria-pressed="false" aria-label="只練到期"></button></div>
+  <div class="srow"><label>認詞顯示例句</label><button class="toggle" id="exChip" aria-pressed="false" aria-label="認詞顯示例句"></button></div>
   <div class="srow"><label for="autoSel">自動同步</label><select id="autoSel">
     <option value="off">關閉</option>
     <option value="open">每次開啟</option>
@@ -233,7 +234,7 @@ let TERMS = BUILTIN;
 
 /* ================= storage ================= */
 let PROG={}, LOG=[], SET={
-  tts:"off", size:20, sec:"ALL", mode:"auto", trap:false, due:false,
+  tts:"off", size:20, sec:"ALL", mode:"auto", trap:false, due:false, showEx:true,
   notion:"", lastSync:"", auto:"daily", lastAuto:0, worker:"", key:""
 };
 const hasWS=typeof window!=="undefined"&&window.storage&&typeof window.storage.get==="function";
@@ -380,16 +381,16 @@ const highlight=(t,s)=>marked(t,s).replace(/\u0001/g,"<b>").replace(/\u0002/g,"<
 const cloze=(t,s)=>marked(t,s).replace(/\u0001[^\u0002]*\u0002/,'<span class="blank">?</span>');
 const hasBlank=(t,s)=>marked(t,s).includes("\u0001");
 const spk=(kind,sm)=>`<button class="spk ${sm?"sm":""}" data-say="${kind}" aria-label="發音">🔊</button>`;
-function usageBlock(t,show){
+function usageBlock(t,show,showExample=true){
   return (t.c?`<div class="collo"><span class="lbl">搭配結構</span>${esc(t.c)}</div>`:"")+
-    (t.e?`<div class="exwrap"><div class="exline">${show?highlight(t.t,t.e):cloze(t.t,t.e)}</div>${show?spk("ex",1):""}</div>`:"");
+    (t.e&&showExample?`<div class="exwrap"><div class="exline">${show?highlight(t.t,t.e):cloze(t.t,t.e)}</div>${show?spk("ex",1):""}</div>`:"");
 }
-function backBlock(t,showEn,withUsage){
+function backBlock(t,showEn,withUsage,showExample=true){
   return `<div class="answer">
     ${showEn?`<div class="en">${esc(t.t)}</div>`:`<div class="zh">${esc(t.z)}</div>`}
     ${showEn&&t.f?`<div class="full">${esc(t.f)}</div>`:""}
     <div class="meaning">${esc(t.m)}</div>
-    ${withUsage?usageBlock(t,true):""}
+    ${withUsage?usageBlock(t,true,showExample):""}
     <div class="note"><span class="lbl">${t.x?"陷阱註記":"使用註記"}</span>${esc(t.n)}</div>
   </div>`;
 }
@@ -433,24 +434,46 @@ function renderRecog(t){
     <div class="termline"><h2 class="term">${esc(t.t)}</h2>${spk("term")}</div>
     ${t.f?`<div class="full">${esc(t.f)}</div>`:""}
     <div class="pos">${esc(t.p)}</div>
-    ${S.revealed?backBlock(t,false,true):""}
+    ${S.revealed?backBlock(t,false,true,SET.showEx):""}
     <div class="spacer"></div><div class="ghost"></div><div class="stampmark"></div></div>
   ${S.revealed?gradeBar:""}`;
   bindGrade(); if(!S.revealed) autoSay(t);
 }
 function renderCloze(t){
-  host.innerHTML=`<div class="card ${t.x?"is-trap":""}">
+  if(!t.copts){
+    const same=TERMS.filter(x=>x.s===t.s&&x.t!==t.t), any=TERMS.filter(x=>x.t!==t.t);
+    const picks=shuffle([...(same.length>=3?same:any)]).slice(0,3);
+    t.copts=shuffle([{w:t.t,ok:1},...picks.map(p=>({w:p.t,ok:0}))]);
+  }
+  host.innerHTML=`<div class="card ${t.x?"is-trap":""}" style="touch-action:auto;cursor:default">
     ${head(t)}
-    <div class="clozeZh">${esc(t.z)}</div>
-    <div class="pos">${esc(t.p)}</div>
-    ${usageBlock(t,S.revealed)}
-    ${S.revealed?`<div class="answer"><div class="en">${esc(t.t)}</div>
+    <div class="exwrap"><div class="exline">${cloze(t.t,t.e)}</div></div>
+    <div class="opts">${t.copts.map((o,k)=>`<button class="opt" data-ok="${o.ok}" data-k="${k}"><span class="k">${"ABCD"[k]}</span><span>${esc(o.w)}</span></button>`).join("")}</div>
+    ${S.answered?`<div class="answer"><div class="en">${esc(t.t)}</div>
       ${t.f?`<div class="full">${esc(t.f)}</div>`:""}
       <div class="meaning">${esc(t.m)}</div>
+      ${usageBlock(t,true)}
       <div class="note"><span class="lbl">${t.x?"陷阱註記":"使用註記"}</span>${esc(t.n)}</div></div>`:""}
-    <div class="spacer"></div><div class="ghost"></div><div class="stampmark"></div></div>
-  ${S.revealed?gradeBar:""}`;
-  bindGrade();
+    <div class="spacer"></div><div class="stampmark"></div></div>
+  ${S.answered?`<div class="actions one"><button class="btn" id="nx">下一張</button></div>`:""}`;
+  const btns=host.querySelectorAll(".opt");
+  if(S.answered){
+    btns.forEach(b=>{b.disabled=true; if(+b.dataset.ok) b.classList.add("right");});
+    if(S.pickedWrong!=null&&btns[S.pickedWrong]) btns[S.pickedWrong].classList.add("wrong");
+    document.getElementById("nx").onclick=next;
+  } else {
+    btns.forEach(b=>b.onclick=()=>{
+      const ok=+b.dataset.ok;
+      S.answered=true; S.pickedWrong=ok?null:+b.dataset.k;
+      const g=ok?2:0, key=idOf(t), r=rec(t), does=scored(t,S.mode)||SET.mode==="auto", before=r.st;
+      if(does){ applyGrade(r,g); PROG[key]=r; saveProg(); }
+      LOG.push([t.t,Math.round(Date.now()/60000),g,"cloze",Math.min(999,Math.round((Date.now()-S.shown)/100)),before,does?1:0]);
+      if(LOG.length>4000) LOG=LOG.slice(-4000);
+      saveLog(); if(LOG.length%8===0) pushState(true);
+      if(g<2) S.queue.splice(Math.min(3,S.queue.length),0,t);
+      render();
+    });
+  }
 }
 const norm=s=>String(s).replace(/\(.*?\)/g,"").toLowerCase().replace(/[^a-z0-9£]+/g," ").trim();
 function lev(a,b){
@@ -531,13 +554,13 @@ function renderTrap(t){
   }
 }
 function bindGrade(){ host.querySelectorAll("[data-g]").forEach(b=>b.onclick=e=>{e.stopPropagation();grade(+b.dataset.g);}); }
-function reveal(){ if(S.mode==="type"||S.mode==="trap") return; S.revealed=true; render(); }
+function reveal(){ if(S.mode==="type"||S.mode==="trap"||S.mode==="cloze") return; S.revealed=true; render(); }
 
 /* ================= tap + swipe ================= */
 function wireCard(){
   const card=host.querySelector(".card"); if(!card||!S.cur) return;
   card.querySelectorAll("[data-say]").forEach(b=>b.onclick=e=>{ e.stopPropagation(); say(b.dataset.say==="ex"?S.cur.e:spoken(S.cur)); });
-  if(S.mode==="trap"||S.mode==="type") return;
+  if(S.mode==="trap"||S.mode==="type"||S.mode==="cloze") return;
   const ghost=card.querySelector(".ghost"), cs=getComputedStyle(document.documentElement);
   const LABEL={left:["Decline",cs.getPropertyValue("--seal")],right:["Approve",cs.getPropertyValue("--stamp")],up:["Refer",cs.getPropertyValue("--refer")]};
   const dirOf=(dx,dy)=>Math.abs(dx)>Math.abs(dy)?(dx<0?"left":"right"):(dy<0?"up":null);
@@ -572,11 +595,11 @@ document.addEventListener("keydown",e=>{
   if(["INPUT","SELECT","TEXTAREA"].includes(e.target.tagName)) return;
   const k=e.key.toLowerCase();
   if(k===" "){ e.preventDefault();
-    if(S.mode==="trap"){ if(S.answered) next(); }
+    if(S.mode==="trap"||S.mode==="cloze"){ if(S.answered) next(); }
     else if(!S.cur) buildQueue(); else if(!S.revealed&&S.mode!=="type") reveal(); }
   if(k==="s"&&S.cur) say(spoken(S.cur));
   if((S.revealed||S.verdict)&&"123".includes(k)) grade(+k-1);
-  if(S.mode==="trap"&&!S.answered&&"abcd".includes(k)){ const b=host.querySelectorAll(".opt")["abcd".indexOf(k)]; if(b) b.click(); }
+  if((S.mode==="trap"||S.mode==="cloze")&&!S.answered&&"abcd".includes(k)){ const b=host.querySelectorAll(".opt")["abcd".indexOf(k)]; if(b) b.click(); }
 });
 
 /* ================= ledger ================= */
@@ -782,6 +805,8 @@ document.addEventListener("visibilitychange",()=>{ if(document.hidden) pushState
   $("workerUrl").onchange=e=>{SET.worker=e.target.value.trim();saveSet();};
   $("workerKey").onchange=e=>{SET.key=e.target.value.trim();saveSet();};
   toggle($("trapChip"),"trap"); toggle($("dueChip"),"due");
+  $("exChip").setAttribute("aria-pressed",!!SET.showEx);
+  $("exChip").onclick=()=>{ SET.showEx=!SET.showEx; $("exChip").setAttribute("aria-pressed",SET.showEx); saveSet(); render(); };
   $("syncBtn").onclick=syncNow;
   $("importBtn").onclick=()=>$("dataFile").click();
   $("dataFile").onchange=async()=>{
