@@ -80,8 +80,8 @@ body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:
 .answer .meaning{margin-top:8px;font-size:15px;color:#22262A}
 .defen{font-family:var(--serif);font-style:italic;font-size:14px;line-height:1.5;color:var(--ink-soft);margin-top:6px}
 .breakdown{font-family:var(--sans);font-size:13px;line-height:1.5;color:var(--ink-soft);margin-top:8px}
-.note{margin-top:14px;font-size:14px;line-height:1.5;color:var(--ink-soft)}
-.is-trap .note{color:#8E2B26}
+.note, .chigen{margin-top:14px;font-size:14px;line-height:1.5;color:var(--ink-soft)}
+.is-trap .note, .is-trap .chigen{color:#8E2B26}
 .spacer{flex:1}
 .clozeZh{font-family:var(--sans);font-weight:700;font-size:clamp(20px,5vw,26px);line-height:1.35;margin-top:22px}
 .blank{display:inline-block;min-width:76px;text-align:center;border-bottom:2px solid var(--seal);color:var(--seal);font-family:var(--mono);font-weight:500}
@@ -395,15 +395,33 @@ function usageBlock(t,show,showExample=true,showCollo=true){
     (t.c&&showCollo?`<div class="collo">${esc(t.c)}</div>`:"")+
     (t.c&&t.g&&showCollo?`<div class="patexp">${esc(t.g)}</div>`:"");
 }
-function backBlock(t,showEn,withUsage,showExample=true){
+function backBlock(t,showEn,withUsage=true,showExampleArg=true){
+  const showTerm = showEn;
+  const showPos = S.mode !== "recog";
+  const showChineseFinance = S.mode !== "type";
+  const showFull = showEn && (S.mode === "cloze" || S.mode === "type");
+  const showBreakdown = true;
+  const showDefEn = true;
+  const showMeaning = S.mode !== "type";
+  const showExample = S.mode === "recog" ? showExampleArg : true;
+  const showPattern = S.mode !== "type";
+  const showPatternExplain = S.mode !== "type";
+  const showNote = true;
+  const showChineseGeneral = true;
+
   return `<div class="answer">
-    ${showEn?`<div class="en">${esc(t.t)}</div>`:`<div class="zh">${esc(t.z)}</div>`}
-    ${showEn&&t.f?`<div class="full">${esc(t.f)}</div>`:""}
-    <div class="meaning">${esc(t.m)}</div>
-    ${t.d?`<div class="defen">${esc(t.d)}</div>`:""}
-    ${t.b?`<div class="breakdown">${esc(t.b)}</div>`:""}
-    ${withUsage?usageBlock(t,true,showExample):""}
-    <div class="note">${esc(t.n)}</div>
+    ${showTerm && t.t ? `<div class="en">${esc(t.t)}</div>` : ""}
+    ${showPos && t.p ? `<div class="pos">${esc(t.p)}</div>` : ""}
+    ${showChineseFinance && t.z ? `<div class="zh">${esc(t.z)}</div>` : ""}
+    ${showFull && t.f ? `<div class="full">${esc(t.f)}</div>` : ""}
+    ${showBreakdown && t.b ? `<div class="breakdown">${esc(t.b)}</div>` : ""}
+    ${showDefEn && t.d ? `<div class="defen">${esc(t.d)}</div>` : ""}
+    ${showMeaning && t.m ? `<div class="meaning">${esc(t.m)}</div>` : ""}
+    ${showExample && t.e ? `<div class="exwrap"><div class="exline">${highlight(t.t,t.e)}</div>${spk("ex",1)}</div>` : ""}
+    ${showPattern && t.c ? `<div class="collo">${esc(t.c)}</div>` : ""}
+    ${showPatternExplain && t.c && t.g ? `<div class="patexp">${esc(t.g)}</div>` : ""}
+    ${showNote && t.n ? `<div class="note">${esc(t.n)}</div>` : ""}
+    ${showChineseGeneral && t.w ? `<div class="chigen">一般語境：${esc(t.w)}</div>` : ""}
   </div>`;
 }
 function head(t){
@@ -462,13 +480,7 @@ function renderCloze(t){
   host.innerHTML=`<div class="card ${t.x?"is-trap":""}" style="touch-action:auto;cursor:default">
     <div class="exwrap"><div class="exline">${cloze(t.t,t.e)}</div></div>
     <div class="opts">${t.copts.map((o,k)=>`<button class="opt" data-ok="${o.ok}" data-k="${k}"><span class="k">${"ABCD"[k]}</span><span>${esc(o.w)}</span></button>`).join("")}</div>
-    ${S.answered?`<div class="answer"><div class="en">${esc(t.t)}</div>
-      ${t.f?`<div class="full">${esc(t.f)}</div>`:""}
-      <div class="meaning">${esc(t.m)}</div>
-      ${t.d?`<div class="defen">${esc(t.d)}</div>`:""}
-      ${t.b?`<div class="breakdown">${esc(t.b)}</div>`:""}
-      ${usageBlock(t,true)}
-      <div class="note">${esc(t.n)}</div></div>`:""}
+    ${S.answered?backBlock(t,true):""}
     <div class="spacer"></div><div class="stampmark"></div></div>
   ${S.answered?`<div class="actions one"><button class="btn" id="nx">下一張</button></div>`:""}`;
   const btns=host.querySelectorAll(".opt");
@@ -513,12 +525,7 @@ function renderType(t){
       ${answered?"":`<button class="btn" id="check" style="padding:11px 16px">送出</button>`}
     </div>
     ${answered?`<div class="verdict ${S.verdict}">${S.verdict==="ok"?"完全正確":S.verdict==="near"?"拼寫差一點":"正解如下"}</div>
-      <div class="answer"><div class="en">${esc(t.t)}</div>
-      ${t.f?`<div class="full">${esc(t.f)}</div>`:""}
-      ${t.d?`<div class="defen">${esc(t.d)}</div>`:""}
-      ${t.b?`<div class="breakdown">${esc(t.b)}</div>`:""}
-      ${usageBlock(t,true,true,false)}
-      <div class="note">${esc(t.n)}</div></div>`:""}
+      ${backBlock(t,true)}`:""}
     <div class="spacer"></div><div class="stampmark"></div></div>
   ${answered?`<div class="actions one"><button class="btn" id="nx">下一張</button></div>`:""}`;
   bindGrade();
@@ -564,8 +571,7 @@ function renderTrap(t){
     <div class="termline"><h2 class="term">${esc(t.t)}</h2>${spk("term")}</div>
     ${t.f?`<div class="full">${esc(t.f)}</div>`:""}
     <div class="opts">${t.opts.map((o,k)=>`<button class="opt" data-ok="${o.ok}" data-k="${k}"><span class="k">${"ABCD"[k]}</span><span>${esc(o.z)}</span></button>`).join("")}</div>
-    ${S.answered?`<div class="answer"><div class="meaning">${esc(t.m)}</div>
-      <div class="note">${esc(t.n)}</div></div>`:""}
+    ${S.answered?backBlock(t,false):""}
     <div class="spacer"></div><div class="stampmark"></div></div>
   ${S.answered?`<div class="actions one"><button class="btn" id="nx">下一張</button></div>`:""}`;
   const btns=host.querySelectorAll(".opt");
